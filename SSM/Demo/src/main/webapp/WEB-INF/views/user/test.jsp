@@ -8,5 +8,6 @@
 </head>
 <body>
 	<h1>User/Test</h1>
+	<script type="text/javascript" src="/scripts/helloworld.js"></script>
 </body>
 </html>

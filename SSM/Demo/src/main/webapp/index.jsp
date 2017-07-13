@@ -17,6 +17,7 @@
 		<li><a href="/validate/manual?name=A&age=1">Validate Manual</a></li>
 		<li><a href="/validate/aop?name=A&age=1">Validate Aop</a></li>
 		<li><a href="/test/index">Test</a></li>
+		<li><a href="/interceptor">Interceptor</a>
 	</ul>
 </body>
 </html>

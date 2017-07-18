@@ -77,7 +77,7 @@
 				</executions>
 			</plugin>
 		</plugins>
-		<defaultGoal>package</defaultGoal>
+		<defaultGoal>clean package</defaultGoal>
 		<finalName>dubbo-provider</finalName>
 	</build>
 </project>

@@ -15,6 +15,8 @@ public class App {
 		String message = service.hello("Henry");
 		System.out.println(message);
 
+		System.out.println(service.now());
+
 		System.in.read();
 	}
 }

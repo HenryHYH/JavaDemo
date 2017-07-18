@@ -15,7 +15,8 @@
 
 	<!-- 校验 -->
 	<context:component-scan base-package="com.helloweb.validate" />
-	<bean id="CustomValidatorRegistry" class="com.helloweb.validate.CustomValidatorRegistry" init-method="init">
+	<bean id="CustomValidatorRegistry" class="com.helloweb.validate.CustomValidatorRegistry"
+		init-method="init">
 		<property name="validatorList">
 			<list>
 				<bean class="com.helloweb.validate.ValidateDtoValidator"></bean>

@@ -78,6 +78,13 @@
 			<version>1.1.0.Final</version>
 		</dependency>
 
+		<!-- https://mvnrepository.com/artifact/javax.servlet/javax.servlet-api -->
+		<dependency>
+			<groupId>javax.servlet</groupId>
+			<artifactId>javax.servlet-api</artifactId>
+			<version>3.1.0</version>
+		</dependency>
+
 	</dependencies>
 	<build>
 		<plugins>
@@ -88,6 +95,6 @@
 			</plugin>
 		</plugins>
 		<defaultGoal>package</defaultGoal>
-		<finalName>Demo</finalName>
+		<finalName>SSM</finalName>
 	</build>
 </project>

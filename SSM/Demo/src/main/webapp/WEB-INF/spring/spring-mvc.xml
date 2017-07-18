@@ -30,7 +30,7 @@
 		<property name="prefix" value="/WEB-INF/views/"></property>
 		<property name="suffix" value=".jsp"></property>
 	</bean>
-	
+
 	<!-- 拦截器 -->
 	<mvc:interceptors>
 		<bean class="com.helloweb.interceptors.LogInterceptor"></bean>

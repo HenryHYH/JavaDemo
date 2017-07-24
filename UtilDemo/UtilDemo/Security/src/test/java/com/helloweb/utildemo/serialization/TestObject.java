@@ -5,7 +5,9 @@ import java.util.Date;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
+@JsonPropertyOrder(value = { "name", "gender", "verified", "image", "birthday" })
 public class TestObject {
 	public enum Gender {
 		MALE, FEMALE
@@ -39,7 +41,7 @@ public class TestObject {
 	private boolean isVerified;
 	@JsonProperty("image")
 	private byte[] userImage;
-	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss", timezone = "GMT+8")
 	private Date birthday;
 
 	public int getAge() {

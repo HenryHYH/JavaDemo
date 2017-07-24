@@ -9,7 +9,7 @@ import org.junit.Test;
 public class JsonUtilTest {
 
 	private String json = "{\"name\":{\"first\":\"Joe\",\"last\":\"Sixpack\"},\"gender\":\"MALE\",\"verified\":false,\"image\":\"Rm9vYmFyIQ==\",\"age\":100,\"birthday\":\"2017-01-01 02:03:04\"}";
-	private String expected = "{\"gender\":\"MALE\",\"name\":{\"first\":\"Joe\",\"last\":\"Sixpack\"},\"birthday\":\"2017-01-01 02:03:04\",\"verified\":false,\"image\":\"Rm9vYmFyIQ==\"}";
+	private String expected = "{\"name\":{\"first\":\"Joe\",\"last\":\"Sixpack\"},\"gender\":\"MALE\",\"verified\":false,\"image\":\"Rm9vYmFyIQ==\",\"birthday\":\"2017-01-01 02:03:04\"}";
 
 	@Test
 	public void test() throws Exception {
@@ -20,8 +20,7 @@ public class JsonUtilTest {
 		Assert.assertEquals(TestObject.Gender.MALE, obj.getGender());
 		Assert.assertEquals(false, obj.isVerified());
 		Assert.assertEquals(0, obj.getAge());
-		Calendar c = new GregorianCalendar();
-		c.set(2017, 1, 1, 02, 03, 04);
+		Calendar c = new GregorianCalendar(2017, 0, 1, 02, 03, 04);
 		Assert.assertEquals(c.getTime(), obj.getBirthday());
 
 		String newJson = JsonUtil.serialize(obj);

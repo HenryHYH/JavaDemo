@@ -1,8 +1,10 @@
 package com.helloweb.utildemo.serialization;
 
 import java.util.Date;
+import java.util.List;
 
 import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlElementWrapper;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlTransient;
 
@@ -12,6 +14,7 @@ public class TestXmlObject {
 	private String name;
 	private int age;
 	private Date birthday;
+	private List<TestXmlFavorite> favorites;
 
 	@XmlElement(name = "nickname")
 	public String getName() {
@@ -31,7 +34,6 @@ public class TestXmlObject {
 		this.age = age;
 	}
 
-	// @XmlElement
 	public Date getBirthday() {
 		return birthday;
 	}
@@ -40,4 +42,13 @@ public class TestXmlObject {
 		this.birthday = birthday;
 	}
 
+	@XmlElementWrapper(name = "favorites")
+	@XmlElement(name = "favorite")
+	public List<TestXmlFavorite> getFavorites() {
+		return favorites;
+	}
+
+	public void setFavorites(List<TestXmlFavorite> favorites) {
+		this.favorites = favorites;
+	}
 }

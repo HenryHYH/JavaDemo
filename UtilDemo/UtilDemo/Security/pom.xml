@@ -54,6 +54,13 @@
 			<version>9.4.6.v20170531</version>
 		</dependency>
 
+		<!-- logging -->
+		<!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-log4j12 -->
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-log4j12</artifactId>
+			<version>1.7.25</version>
+		</dependency>
 
 	</dependencies>
 </project>

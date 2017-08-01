@@ -5,8 +5,14 @@ import java.util.Map;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+
+import com.helloweb.springbootdemo.configuration.RandomConfig;
+import com.helloweb.springbootdemo.configuration.TestConfig;
+import com.helloweb.springbootdemo.configuration.ValueConfig;
 
 @SpringBootApplication
+@EnableConfigurationProperties({ ValueConfig.class, TestConfig.class, RandomConfig.class })
 public class App {
 
 	public static void main(String[] args) {

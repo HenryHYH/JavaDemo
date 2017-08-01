@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html xmlns:th="http://thymeleaf.org">
+<head>
+<meta charset="UTF-8" />
+<meta http-equiv="Content-Type" content="text/html; chartset=UTF-8" />
+<title>Hello index</title>
+<link rel="stylesheet" type="text/css" href="/styles/main.css" />
+</head>
+<body>
+
+	<div class="main">
+		<h1>Hello world</h1>
+		<table width="100%" border="1" cellspacing="1" cellpadding="0">
+			<thead>
+				<tr>
+					<td>Name</td>
+				</tr>
+			</thead>
+			<tbody>
+				<tr th:each="item:${list}">
+					<td th:text="${item.name}">Name</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+
+	<script type="text/javascript" src="/scripts/hello.js"></script>
+	<script type="text/javascript" src="/webjars/jquery/1.12.4/jquery.min.js"></script>
+	<script type="text/javascript">
+		$(function() {
+			alert("jquery");
+		});
+	</script>
+</body>
+</html>

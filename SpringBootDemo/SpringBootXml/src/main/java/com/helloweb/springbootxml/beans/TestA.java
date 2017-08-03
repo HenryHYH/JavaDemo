@@ -3,17 +3,11 @@ package com.helloweb.springbootxml.beans;
 import org.springframework.stereotype.Component;
 
 @Component
-// @Primary
-public class BeanD implements IBean {
-
-	@Override
-	public void show() {
-		System.out.println("BeanD");
-	}
+public class TestA implements ITest {
 
 	@Override
 	public String get() {
-		return "BeanD";
+		return "TestA";
 	}
 
 }

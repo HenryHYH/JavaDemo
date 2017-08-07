@@ -4,9 +4,8 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
 
-@Component
+// @Component
 public class TestJob {
 
 	@Scheduled(fixedRate = 1000) // 上一次开始实行时间点后2秒再次执行

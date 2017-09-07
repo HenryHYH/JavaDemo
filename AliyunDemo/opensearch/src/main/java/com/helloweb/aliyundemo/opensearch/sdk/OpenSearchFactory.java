@@ -1,7 +1,6 @@
-package com.helloweb.aliyundemo.opensearch.demo;
+package com.helloweb.aliyundemo.opensearch.sdk;
 
-import java.util.Map;
-
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.aliyun.opensearch.DocumentClient;
@@ -21,17 +20,17 @@ import com.aliyun.opensearch.sdk.generated.search.Suggest;
 import com.aliyun.opensearch.sdk.generated.search.general.SearchResult;
 import com.aliyun.opensearch.search.SearchParamsBuilder;
 import com.aliyun.opensearch.search.SearchResultDebug;
+import com.helloweb.aliyundemo.opensearch.configuration.OpenSearchConfiguration;
 
 @Component
 public class OpenSearchFactory {
 
-	private String accessKey = "LTAIAEMVSMtDaRcn";
-	private String accessSecret = "u6CgiFiWd6ahL8ux4fRd7tWmiHmDhH";
-	private String host = "http://opensearch-cn-hangzhou.aliyuncs.com";
+	@Autowired
+	private OpenSearchConfiguration config;
 	private String appName = "helloworld";
 
 	private OpenSearchClient getClient() {
-		OpenSearch option = new OpenSearch(accessKey, accessSecret, host);
+		OpenSearch option = new OpenSearch(config.getAccessKey(), config.getAccessSecret(), config.getHost());
 
 		return new OpenSearchClient(option);
 	}
@@ -44,6 +43,19 @@ public class OpenSearchFactory {
 		return new DocumentClient(getClient());
 	}
 
+	private Config getConfig(BaseSearchRequest request) {
+
+		Config config = new Config(Lists.newArrayList(request.getAppName()));
+		config.setSearchFormat(SearchFormat.FULLJSON);
+
+		// 分页
+		config.setStart(request.getStart());
+		config.setHits(request.getHits());
+
+		return config;
+	}
+
+	@SuppressWarnings("unused")
 	private void printDebug(SearcherClient client, SearchParams params)
 			throws OpenSearchException, OpenSearchClientException {
 
@@ -90,91 +102,102 @@ public class OpenSearchFactory {
 		}
 	}
 
-	public String search(String query) {
+	public SearchResponse search(SearchRequest request) {
 
-		String result = "NULL";
+		String json = "";
+		String error = "";
 
-		SearcherClient search = getSearcherClient();
-
-		Config config = new Config(Lists.newArrayList(appName));
-		config.setStart(0);
-		config.setHits(5);
-		config.setSearchFormat(SearchFormat.FULLJSON);
-		// config.setFetchFields(Lists.newArrayList("id", "title", "description",
-		// "name"));
+		Config config = getConfig(request);
+		// 设置返回的字段
+		if (null != request.getFetchFields() && !request.getFetchFields().isEmpty())
+			config.setFetchFields(request.getFetchFields());
+		// 设置kvpairs
+		if (null != request.getKvparis() && !request.getKvparis().isEmpty())
+			config.setKvpairs(request.getKvparis());
 
 		SearchParams searchParams = new SearchParams(config);
-		searchParams.setQuery(query);
+		searchParams.setQuery(request.getQuery());
 
-		SearchParamsBuilder paramsBuilder = SearchParamsBuilder.create(searchParams);
+		SearchParamsBuilder builder = SearchParamsBuilder.create(searchParams);
+		SearcherClient client = getSearcherClient();
+		try {
+			SearchResult searchResult = client.execute(builder);
+			json = searchResult.getResult();
+		} catch (OpenSearchException | OpenSearchClientException e) {
+			e.printStackTrace();
+			error = e.toString();
+		}
 
+		return new SearchResponse(json, error);
+	}
+
+	public SuggestResponse suggest(SuggestRequest request) {
+
+		String json = "";
+		String error = "";
+
+		Config config = getConfig(request);
+		SearchParams searchParams = new SearchParams(config);
+
+		Suggest suggest = new Suggest(request.getSuggestName());
+		searchParams.setSuggest(suggest);
+		searchParams.setQuery(request.getQuery());
+
+		SearchParamsBuilder builder = SearchParamsBuilder.create(searchParams);
+		SearcherClient client = getSearcherClient();
 		try {
 
-			SearchResult searchResult = search.execute(paramsBuilder);
-			String strResult = searchResult.getResult();
-			JSONObject obj = new JSONObject(strResult);
-			result = obj.toString();
-
-			printDebug(search, searchParams);
+			SearchResult searchResult = client.execute(builder);
+			json = searchResult.getResult();
 
 		} catch (OpenSearchException | OpenSearchClientException e) {
 			e.printStackTrace();
+			error = e.toString();
 		}
 
-		return result;
+		return new SuggestResponse(json, error);
 	}
 
-	public String suggest(String query) throws OpenSearchException, OpenSearchClientException {
+	public DocumentResponse addDocument(DocumentRequest request) {
+		return documentAction(request, (client, fields) -> {
+			client.add(request.getFields());
+		});
+	}
 
-		String result = "NULL";
+	public DocumentResponse updateDocument(DocumentRequest request) {
+		return documentAction(request, (client, fields) -> {
+			client.update(request.getFields());
+		});
+	}
 
-		SearcherClient client = getSearcherClient();
+	public DocumentResponse deleteDocument(DocumentRequest request) {
+		return documentAction(request, (client, fields) -> {
+			client.remove(request.getFields());
+		});
+	}
 
-		Config config = new Config(Lists.newArrayList(appName));
-		config.setStart(0);
-		config.setHits(5);
-		config.setSearchFormat(SearchFormat.FULLJSON);
+	private DocumentResponse documentAction(DocumentRequest request, Action action) {
 
-		SearchParams searchParams = new SearchParams(config);
+		String result = "";
+		String error = "";
 
-		Suggest sug = new Suggest("hello_dropdown");
-		searchParams.setSuggest(sug);
-		searchParams.setQuery(query);
+		DocumentClient client = getDocumentClient();
+		action.execute(client, request);
 
-		SearchParamsBuilder paramsBuilder = SearchParamsBuilder.create(searchParams);
+		try {
+			OpenSearchResult searchResult = client.commit(request.getAppName(), request.getTableName());
+			result = searchResult.getResult();
 
-		SearchResult searchResult = client.execute(paramsBuilder);
-		String json = searchResult.getResult();
-		JSONObject obj = new JSONObject(json);
-		if (!obj.has("errors")) {
-			result = obj.toString();
+		} catch (OpenSearchException | OpenSearchClientException e) {
+			e.printStackTrace();
+			error = e.toString();
 		}
 
-		return result;
+		return new DocumentResponse(result, error);
 	}
 
-	public String addDocument(String tableName, Map<String, Object> fields)
-			throws OpenSearchException, OpenSearchClientException {
-
-		DocumentClient client = getDocumentClient();
-
-		client.add(fields);
-		OpenSearchResult response = client.commit(appName, tableName);
-		System.out.println(response.getTraceInfo());
-
-		return response.getResult();
-	}
-
-	public String updateDocument(String tableName, Map<String, Object> fields)
-			throws OpenSearchException, OpenSearchClientException {
-
-		DocumentClient client = getDocumentClient();
-
-		client.update(fields);
-		OpenSearchResult response = client.commit(appName, tableName);
-		System.out.println(response.getTraceInfo());
-
-		return response.getResult();
+	private interface Action {
+		void execute(DocumentClient client, DocumentRequest request);
 	}
 
 }

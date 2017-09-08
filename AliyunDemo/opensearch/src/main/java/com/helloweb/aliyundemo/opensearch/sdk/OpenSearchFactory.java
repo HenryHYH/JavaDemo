@@ -1,5 +1,7 @@
 package com.helloweb.aliyundemo.opensearch.sdk;
 
+import java.util.Map.Entry;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -12,11 +14,18 @@ import com.aliyun.opensearch.sdk.generated.OpenSearch;
 import com.aliyun.opensearch.sdk.generated.commons.OpenSearchClientException;
 import com.aliyun.opensearch.sdk.generated.commons.OpenSearchException;
 import com.aliyun.opensearch.sdk.generated.commons.OpenSearchResult;
+import com.aliyun.opensearch.sdk.generated.search.Aggregate;
 import com.aliyun.opensearch.sdk.generated.search.Config;
 import com.aliyun.opensearch.sdk.generated.search.DeepPaging;
+import com.aliyun.opensearch.sdk.generated.search.Distinct;
+import com.aliyun.opensearch.sdk.generated.search.Order;
+import com.aliyun.opensearch.sdk.generated.search.Rank;
 import com.aliyun.opensearch.sdk.generated.search.SearchFormat;
 import com.aliyun.opensearch.sdk.generated.search.SearchParams;
+import com.aliyun.opensearch.sdk.generated.search.Sort;
+import com.aliyun.opensearch.sdk.generated.search.SortField;
 import com.aliyun.opensearch.sdk.generated.search.Suggest;
+import com.aliyun.opensearch.sdk.generated.search.Summary;
 import com.aliyun.opensearch.sdk.generated.search.general.SearchResult;
 import com.aliyun.opensearch.search.SearchParamsBuilder;
 import com.aliyun.opensearch.search.SearchResultDebug;
@@ -116,7 +125,73 @@ public class OpenSearchFactory {
 			config.setKvpairs(request.getKvparis());
 
 		SearchParams searchParams = new SearchParams(config);
+		// 设置query
 		searchParams.setQuery(request.getQuery());
+		// 设置查询分析
+		if (null != request.getQp() && !request.getQp().isEmpty()) {
+			searchParams.setQueryProcessorNames(request.getQp());
+		}
+		// Distinct子句
+		if (null != request.getDistincts() && !request.getDistincts().isEmpty()) {
+			for (SearchRequestDistinct item : request.getDistincts()) {
+				Distinct distinct = new Distinct();
+				distinct.setKey(item.getKey());
+				distinct.setDistCount(item.getDistCount());
+				distinct.setDistTimes(item.getDistTimes());
+				distinct.setReserved(item.isReserved());
+				distinct.setUpdateTotalHit(item.isUpdateTotalHit());
+				distinct.setDistFilter(item.getDistFilter());
+				distinct.setGrade(item.getGrade());
+				searchParams.addToDistincts(distinct);
+			}
+		}
+		// Aggregate子句
+		if (null != request.getAggregates() && !request.getAggregates().isEmpty()) {
+			for (SearchRequestAggregate item : request.getAggregates()) {
+				Aggregate agg = new Aggregate();
+				agg.setGroupKey(item.getGroupKey());
+				agg.setAggFun(item.getAggFun());
+				agg.setAggFilter(item.getAggFilter());
+				agg.setRange(item.getRange());
+				agg.setAggSamplerThresHold(item.getAggSamplerThresHold());
+				agg.setAggSamplerStep(item.getAggSamplerStep());
+				agg.setMaxGroup(item.getMaxGroup());
+				searchParams.addToAggregates(agg);
+			}
+		}
+		// Filters子句
+		if (null != request.getFilter() && !request.getFilter().isEmpty())
+			searchParams.setFilter(request.getFilter());
+		// Sort子句
+		if (null != request.getSort() && !request.getSort().isEmpty()) {
+			Sort sort = new Sort();
+			for (Entry<String, Integer> item : request.getSort().entrySet()) {
+				String field = item.getKey();
+				Order order = Order.findByValue(item.getValue());
+				SortField sortField = new SortField(field, order);
+				sort.addToSortFields(sortField);
+			}
+			searchParams.setSort(sort);
+		}
+		// Rank子句
+		if (null != request.getRank()) {
+			Rank rank = new Rank();
+			rank.setFirstRankName(rank.getFirstRankName());
+			rank.setSecondRankName(rank.getSecondRankName());
+			searchParams.setRank(rank);
+		}
+		// 设置Summary
+		if (null != request.getSummaries() && !request.getSummaries().isEmpty()) {
+			for (SearchRequestSummary item : request.getSummaries()) {
+				Summary summary = new Summary();
+				summary.setSummary_field(item.getField());
+				summary.setSummary_len(String.valueOf(item.getLength()));
+				summary.setSummary_element(item.getElement());
+				summary.setSummary_ellipsis(item.getEllipsis());
+				summary.setSummary_snippet(String.valueOf(item.getSnippet()));
+				searchParams.addToSummaries(summary);
+			}
+		}
 
 		SearchParamsBuilder builder = SearchParamsBuilder.create(searchParams);
 		SearcherClient client = getSearcherClient();

@@ -7,17 +7,17 @@ public class BaseResponse {
 	private String json;
 
 	public BaseResponse() {
-		this.success = false;
-		this.error = "";
 	}
 
 	public BaseResponse(String error) {
+		this();
 		this.success = false;
 		this.error = error;
 		this.json = "";
 	}
 
 	public BaseResponse(String json, String error) {
+		this();
 		this.success = null == error || error.isEmpty();
 		this.error = error;
 		this.json = json;

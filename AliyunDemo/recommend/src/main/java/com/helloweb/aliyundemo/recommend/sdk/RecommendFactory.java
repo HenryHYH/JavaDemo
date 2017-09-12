@@ -1,21 +1,29 @@
 package com.helloweb.aliyundemo.recommend.sdk;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.security.MessageDigest;
 import java.text.SimpleDateFormat;
 import java.util.Base64;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
+import java.util.zip.GZIPOutputStream;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
+import javax.net.ssl.HttpsURLConnection;
 
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -25,14 +33,16 @@ public class RecommendFactory {
 		return Base64.getEncoder().encodeToString(content);
 	}
 
-	/*
-	 * 计算MD5+BASE64
+	/**
+	 * MD5+Base64
+	 * 
+	 * @param utfBytes
+	 * @return
 	 */
-	public static String MD5Base64(String s) {
-		if (s == null)
+	public static String MD5Base64(byte[] utfBytes) {
+		if (utfBytes == null)
 			return null;
 		String encodeStr = "";
-		byte[] utfBytes = s.getBytes();
 		MessageDigest mdTemp;
 		try {
 			mdTemp = MessageDigest.getInstance("MD5");
@@ -45,8 +55,25 @@ public class RecommendFactory {
 		return encodeStr;
 	}
 
-	/*
+	/**
+	 * 计算MD5+BASE64
+	 * 
+	 * @param s
+	 * @return
+	 */
+	public static String MD5Base64(String s) {
+		if (null == s)
+			return null;
+
+		return MD5Base64(s.getBytes());
+	}
+
+	/**
 	 * 计算 HMAC-SHA1
+	 * 
+	 * @param data
+	 * @param key
+	 * @return
 	 */
 	public static String HMACSha1(String data, String key) {
 		String result;
@@ -62,8 +89,11 @@ public class RecommendFactory {
 		return result;
 	}
 
-	/*
+	/**
 	 * 等同于javaScript中的 new Date().toUTCString();
+	 * 
+	 * @param date
+	 * @return
 	 */
 	public static String toGMTString(Date date) {
 		SimpleDateFormat df = new SimpleDateFormat("E, dd MMM yyyy HH:mm:ss z", Locale.UK);
@@ -71,7 +101,106 @@ public class RecommendFactory {
 		return df.format(date);
 	}
 
-	/*
+	public static String sendPostGZIP(String url, JSONArray content, String assessKeyId, String accessKeySecret)
+			throws Exception {
+		HttpsURLConnection conn = null;
+		try {
+			BufferedReader in = null;
+			URL realUrl = new URL(url);
+			StringBuilder result = new StringBuilder();
+			/*
+			 * http header 参数 必须设置
+			 */
+			String method = "POST";
+			String accept = "application/json";
+			String content_type = "application/json";
+			String path = realUrl.getFile();
+			String date = toGMTString(new Date());
+			String content_encoding = "gzip";
+			// 1. 对日志JSONArray进行FGZIP压缩
+			byte[] body = compressToByte(content);
+			// 2. 对body做MD5+BASE64加密
+			String body_md5 = MD5Base64(body);
+			String string_to_sign = method + "\n" + accept + "\n" + body_md5 + "\n" + content_type + "\n" + date + "\n"
+					+ path;
+			// 3.计算 HMAC-SHA1
+			String signature = HMACSha1(string_to_sign, accessKeySecret);
+			// 4.得到 authorization header
+			String auth_header = "Dataplus " + assessKeyId + ":" + signature;
+			// 发起连接
+			conn = (HttpsURLConnection) realUrl.openConnection();
+			// 设置超时, 建议1分钟, 可以更大一点
+			conn.setConnectTimeout(60000);
+			conn.setReadTimeout(60000);
+			// 设置请求方法
+			conn.setRequestMethod("POST");
+			// 设置通用的请求属性
+			conn.setRequestProperty("accept", accept);
+			conn.setRequestProperty("content-type", content_type);
+			conn.setRequestProperty("date", date);
+			conn.setRequestProperty("Authorization", auth_header);
+			// 必须要设置为GZIP，否则服务器会不接受
+			conn.setRequestProperty("Content-Encoding", content_encoding);
+			// 发送POST请求必须设置如下两行
+			conn.setDoOutput(true);
+			conn.setDoInput(true);
+			// 设置是非缓存
+			conn.setUseCaches(false);
+			// 传输body流 必须GZIP加密后字节数组
+			DataOutputStream data_stream = new DataOutputStream(conn.getOutputStream());
+			data_stream.write(body);
+			data_stream.flush();
+			data_stream.close();
+			if (conn.getResponseCode() != 200) {
+				System.err.println("日志API连接失败!");
+			} else {
+				// 返回jsonobject
+				in = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+				String line = null;
+				while ((line = in.readLine()) != null) {
+					result.append(line);
+				}
+				if (result.length() > 0) {
+					JSONObject rsp_json = new JSONObject(result.toString());
+					int success = rsp_json.getInt("success");
+					if (success == 1) {
+						System.out.println("数据上传成功");
+					} else {
+						System.out.println("数据上传失败, 出错信息: " + rsp_json.getString("errMsg"));
+					}
+				}
+			}
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			if (conn != null) {
+				conn.disconnect();
+			}
+		}
+
+		return "OK";
+	}
+
+	private static byte[] compressToByte(JSONArray content) {
+		try {
+			ByteArrayOutputStream out = new ByteArrayOutputStream();
+			GZIPOutputStream gzip = new GZIPOutputStream(out);
+
+			gzip.write(content.toString().getBytes("utf-8"));
+			gzip.finish();
+			gzip.flush();
+			gzip.close();
+
+			return out.toByteArray();
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	/**
 	 * 发送POST请求
 	 */
 	public static String sendPost(String url, String body, String assessKeyId, String accessKeySecret)
@@ -145,7 +274,7 @@ public class RecommendFactory {
 		return result;
 	}
 
-	/*
+	/**
 	 * GET请求
 	 */
 	public static String sendGet(String url, String accessKeyId, String accessKeySecret) throws Exception {
@@ -207,9 +336,13 @@ public class RecommendFactory {
 		return result;
 	}
 
-	public static void sendLog() {
-		// String url =
-		// "https://dtplus-cn-shanghai.data.aliyuncs.com/dt_ng_1352702786563330/re/uploadlog?businessName=recommend&customerName=rec_movie&token=alidata73315607a7cca280187441263";
+	public static void sendLog(List<String> logs) throws Exception {
+		String url = "https://dtplus-cn-shanghai.data.aliyuncs.com/dt_ng_1352702786563330/re/uploadlog?businessName=recommend&customerName=rec_movie&token=alidata73315607a7cca280187441263";
+		JSONArray content = new JSONArray();
+		for (String log : logs)
+			content.put(log);
+		String result = sendPostGZIP(url, content, "LTAIAEMVSMtDaRcn", "u6CgiFiWd6ahL8ux4fRd7tWmiHmDhH");
+		System.out.println("response body:" + result);
 	}
 
 	public static void rec() throws Exception {

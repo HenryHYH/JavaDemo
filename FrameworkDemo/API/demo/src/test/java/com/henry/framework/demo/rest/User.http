@@ -1,0 +1,9 @@
+### login
+
+POST http://localhost:8080/user/login
+Content-Type: application/json
+
+{
+    "mobile": "1",
+    "vcode": "2"
+}

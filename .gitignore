@@ -34,3 +34,4 @@ target
 # vscode
 .vscode
 *.code-workspace
+.factorypath

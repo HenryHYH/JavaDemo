@@ -30,3 +30,7 @@ target
 .settings
 .metadata
 .recommenders
+
+# vscode
+.vscode
+*.code-workspace

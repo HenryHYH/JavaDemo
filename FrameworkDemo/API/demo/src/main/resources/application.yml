@@ -1,3 +1,7 @@
 spring:
   application:
     name: Framework
+  cloud:
+    nacos:
+      discovery:
+        server-addr: henry.cn:8848

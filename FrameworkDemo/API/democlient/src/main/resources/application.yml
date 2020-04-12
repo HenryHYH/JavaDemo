@@ -1,0 +1,10 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: democlient
+  cloud:
+    nacos:
+      discovery:
+        server-addr: henry.cn:8848

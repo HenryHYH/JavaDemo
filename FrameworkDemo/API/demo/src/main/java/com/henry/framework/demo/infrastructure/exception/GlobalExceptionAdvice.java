@@ -1,8 +1,8 @@
 package com.henry.framework.demo.infrastructure.exception;
 
-import com.henry.framework.demo.dto.result.ResultCode;
-import com.henry.framework.demo.dto.result.ResultData;
-import com.henry.framework.demo.dto.exception.BusinessException;
+import com.henry.framework.core.dto.result.ResultCode;
+import com.henry.framework.core.dto.result.ResultData;
+import com.henry.framework.core.dto.exception.BusinessException;
 
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;

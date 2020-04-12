@@ -3,7 +3,7 @@ package com.henry.framework.demo.rest;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
-import com.henry.framework.demo.dto.exception.BusinessException;
+import com.henry.framework.core.dto.exception.BusinessException;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;

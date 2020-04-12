@@ -1,4 +1,4 @@
-package com.henry.framework.demo.dto.result;
+package com.henry.framework.core.dto.result;
 
 import lombok.Getter;
 

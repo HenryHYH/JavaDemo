@@ -2,8 +2,8 @@ package com.henry.framework.demo.infrastructure.response;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.henry.framework.demo.dto.exception.BusinessException;
-import com.henry.framework.demo.dto.result.ResultData;
+import com.henry.framework.core.dto.exception.BusinessException;
+import com.henry.framework.core.dto.result.ResultData;
 
 import org.springframework.core.MethodParameter;
 import org.springframework.http.MediaType;

@@ -1,10 +1,12 @@
-package com.henry.framework.demo.dto.result;
+package com.henry.framework.core.dto.result;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 import lombok.Getter;
+import lombok.ToString;
 
+@ToString
 public class ResultData<T> {
 
     @Getter
@@ -18,6 +20,9 @@ public class ResultData<T> {
 
     @Getter
     private T data;
+
+    public ResultData() {
+    }
 
     public ResultData(T data) {
         this(ResultCode.SUCCESS, data);

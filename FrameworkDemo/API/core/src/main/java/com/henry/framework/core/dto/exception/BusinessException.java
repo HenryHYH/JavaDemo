@@ -1,4 +1,4 @@
-package com.henry.framework.demo.dto.exception;
+package com.henry.framework.core.dto.exception;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;

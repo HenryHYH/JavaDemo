@@ -1,1 +1,3 @@
-
+nacos:
+    config:
+        server-addr: henry.cn:8848

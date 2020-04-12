@@ -1,4 +1,4 @@
-package com.henry.framework.democlient.democlient;
+package com.henry.framework.democlient;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

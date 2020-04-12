@@ -1,3 +1,3 @@
-nacos:
-    config:
-        server-addr: henry.cn:8848
+spring:
+  application:
+    name: Framework
